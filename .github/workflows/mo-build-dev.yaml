@@ -15,8 +15,6 @@ env:
   MO_REGISTRY_URL: ghcr.io/janlepsky
   MO_IMAGE_NAME: off-gw
   MO_API_KIND: workspace
-  MO_API_TOKEN_EXPIRES_AT__751644F8227CF84F4CFA: '2299-07-05T10:15:39.000Z'
-  MO_SERVICE__751644F8227CF84F4CFA: H4sIAAAAAAAAA13MwW6EIBSF4Xc5a0hFQdR1N930Ha54OyGjQACnaSfz7o22mUW3/7n3uyPmCwX/TdXH8LZgwoftWtdrkp3VvdRLy3KeZyf10IxktOLFOgi4dS+V8/nSLLOxhnrZdoOR2gwkyVgn1aDM3Gs1qn6EwGfM15LI8TttjAmVaWsUBDKXuGfHmO64+nCQr5zW+LVxqBAIv/fLs5W/eGqYAIFLjnvCBEqpvNwO9ca5+BiO+fE0kk+8+sCVS/2HHNOZHz/MJxbcFgEAAA==
 jobs:
   build-image:
     runs-on: ubuntu-latest
@@ -64,15 +62,3 @@ jobs:
             ${{ env.MO_REGISTRY_URL }}/${{ env.MO_IMAGE_NAME }}:latest
             ${{ env.MO_REGISTRY_URL }}/${{ env.MO_IMAGE_NAME }}:${{ env.LAST_HASH }}
           build-args: VERSION=${{ env.VERSION }}
-      - id: releaseWithMogenius-751644F8227CF84F4CFA
-        name: Release with mogenius
-        uses: mogenius/mogenius-release-action@v1
-        with:
-          dev: false
-          image: ${{ env.MO_REGISTRY_URL }}/${{ env.MO_IMAGE_NAME }}:${{ env.VERSION }}
-          kind: Deployment
-          namespace: pipetest
-          resourceName: pipelinetest
-          containerName: nginx
-          keyKind: ${{ env.MO_API_KIND }}
-          token: bearer ${{ secrets.MO_API_TOKEN__751644F8227CF84F4CFA__MO_BUILD_DEV }}
