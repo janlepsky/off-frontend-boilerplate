@@ -15,6 +15,8 @@ env:
   MO_REGISTRY_URL: ghcr.io/janlepsky
   MO_IMAGE_NAME: off-gw
   MO_API_KIND: workspace
+  MO_API_TOKEN_EXPIRES_AT__496C4400656626E79589: '2026-09-01T15:24:28.000Z'
+  MO_SERVICE__496C4400656626E79589: H4sIAAAAAAAAA1XMsW7DIBSF4Xc5M6i1gZgwZ+nSsfu1uUQoNiCwm7ZR3r2qK0Xt+umc/4Zcz5TiF60xpxcPB63sQDQa2atgpLZDL+3xYGSwY/Bj12nuGQLTvLWV634J2hyssVoqrwep+8Dy2CklJzvaITxbb5WBwDXXSys08SstDIfE1wdBoHLLW50Y7oZLTD/hE5c5fy6cVgiUeas0w8E/tEGASnzj2mJOcKBS2tN7B4FEC+9lD7fWje+/tN+XnM4xffxd/fP7N6hrchEXAQAA
 jobs:
   build-image:
     runs-on: ubuntu-latest
@@ -61,4 +63,16 @@ jobs:
             ${{ env.MO_REGISTRY_URL }}/${{ env.MO_IMAGE_NAME }}:${{ env.VERSION }}
             ${{ env.MO_REGISTRY_URL }}/${{ env.MO_IMAGE_NAME }}:latest
             ${{ env.MO_REGISTRY_URL }}/${{ env.MO_IMAGE_NAME }}:${{ env.LAST_HASH }}
-          build-args: VERSION=${{ env.VERSION }}
+          build-args: ''
+      - id: releaseWithMogenius-496C4400656626E79589
+        name: Release with mogenius
+        uses: mogenius/mogenius-release-action@v1
+        with:
+          dev: true
+          image: ${{ env.MO_REGISTRY_URL }}/${{ env.MO_IMAGE_NAME }}:${{ env.VERSION }}
+          kind: Deployment
+          namespace: demonginx
+          resourceName: demonginx
+          containerName: nginx
+          keyKind: ${{ env.MO_API_KIND }}
+          token: bearer ${{ secrets.MO_API_TOKEN__496C4400656626E79589__MO_BUILD_DEV }}
