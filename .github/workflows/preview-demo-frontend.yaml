@@ -64,15 +64,3 @@ jobs:
             ${{ env.MO_REGISTRY_URL }}/${{ env.MO_IMAGE_NAME }}:latest
             ${{ env.MO_REGISTRY_URL }}/${{ env.MO_IMAGE_NAME }}:${{ env.LAST_HASH }}
           build-args: VERSION=${{ env.VERSION }}
-      - id: releaseWithMogenius-81425723A39157049C61
-        name: Release with mogenius
-        uses: mogenius/mogenius-release-action@v1
-        with:
-          dev: true
-          image: ${{ env.MO_REGISTRY_URL }}/${{ env.MO_IMAGE_NAME }}:${{ env.VERSION }}
-          kind: Deployment
-          namespace: preview-demo
-          resourceName: preview-demo-frontend
-          containerName: preview-demo-frontend
-          keyKind: ${{ env.MO_API_KIND }}
-          token: bearer ${{ secrets.MO_API_TOKEN__81425723A39157049C61__PREVIEW_DEMO_FRONTEND }}
