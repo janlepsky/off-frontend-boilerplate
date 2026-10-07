@@ -9,7 +9,7 @@ env:
   MO_DOCKERCONTEXT: .
   MO_REGISTRY_AUTH_URL: https://ghcr.io
   MO_REGISTRY_URL: ghcr.io/janlepsky
-  MO_IMAGE_NAME: preview-demo-frontend
+  MO_IMAGE_NAME: ${{ github.event.repository.name }}
 
 jobs:
   build-preview:
@@ -44,6 +44,8 @@ jobs:
           push: true
           tags: |
             ${{ env.MO_REGISTRY_URL }}/${{ env.MO_IMAGE_NAME }}:${{ env.SHORT_SHA }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
 
       - name: Summary
         run: |
