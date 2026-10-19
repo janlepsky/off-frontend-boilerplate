@@ -64,15 +64,18 @@ jobs:
             ${{ env.MO_REGISTRY_URL }}/${{ env.MO_IMAGE_NAME }}:latest
             ${{ env.MO_REGISTRY_URL }}/${{ env.MO_IMAGE_NAME }}:${{ env.LAST_HASH }}
           build-args: ''
-      - id: releaseWithMogenius-29367AB67F35708B36B7
-        name: Release with mogenius
-        uses: mogenius/mogenius-release-action@8be39c76c0206062eb9f26d8fb84b88a5f2dc61b
-        with:
-          dev: false
-          image: ${{ env.MO_REGISTRY_URL }}/${{ env.MO_IMAGE_NAME }}:${{ env.VERSION }}
-          kind: Deployment
-          namespace: development
-          resourceName: pipeline-starter-test
-          containerName: pipeline-starter-test
-          keyKind: ${{ env.MO_API_KIND }}
-          token: bearer ${{ secrets.MO_API_TOKEN__29367AB67F35708B36B7__MYNEWPIPELINETEST }}
+      - name: Release with mogenius
+        env:
+          MO_API_TOKEN: ${{ secrets.MO_API_TOKEN__29367AB67F35708B36B7__MYNEWPIPELINETEST }}
+        run: |
+          curl --fail-with-body -sS -X POST \
+            "https://platform-api.plusserver.mogenius.com/resource/workload/set-image" \
+            -H "Authorization: bearer ${MO_API_TOKEN}" \
+            -H "Content-Type: application/json" 
+            -d '{
+              "kind": "Deployment",
+              "namespace": "development",
+              "resourceName": "pipeline-starter-test",
+              "containerName": "pipeline-starter-test",
+              "image": "${{ env.MO_REGISTRY_URL }}/${{ env.MO_IMAGE_NAME }}:${{ env.VERSION }}"
+            }'
