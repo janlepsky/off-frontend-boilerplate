@@ -5,7 +5,11 @@
       "name": "develop",
       "prerelease": true
     },
-    "master"
+    "master",
+    {
+      "name": "pipeline-test",
+      "prerelease": true
+    }
   ],
   "plugins": [
     "@semantic-release/commit-analyzer",
