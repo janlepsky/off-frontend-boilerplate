@@ -67,15 +67,7 @@ jobs:
       - name: Release with mogenius
         env:
           MO_API_TOKEN: ${{ secrets.MO_API_TOKEN__29367AB67F35708B36B7__MYNEWPIPELINETEST }}
+          MO_IMAGE: ${{ env.MO_REGISTRY_URL }}/${{ env.MO_IMAGE_NAME }}:${{ env.VERSION }}
         run: |
-          curl --fail-with-body -sS -X POST \
-            "https://platform-api.plusserver.mogenius.com/resource/workload/set-image" \
-            -H "Authorization: bearer ${MO_API_TOKEN}" \
-            -H "Content-Type: application/json" 
-            -d '{
-              "kind": "Deployment",
-              "namespace": "development",
-              "resourceName": "pipeline-starter-test",
-              "containerName": "pipeline-starter-test",
-              "image": "${{ env.MO_REGISTRY_URL }}/${{ env.MO_IMAGE_NAME }}:${{ env.VERSION }}"
-            }'
+          BODY="{\"kind\":\"Deployment\",\"namespace\":\"development\",\"resourceName\":\"pipeline-starter-test\",\"containerName\":\"pipeline-starter-test\",\"image\":\"${MO_IMAGE}\"}"
+          curl --fail-with-body -sS -X POST "https://platform-api.plusserver.mogenius.com/resource/workload/set-image" -H "Authorization: bearer ${MO_API_TOKEN}" -H "Content-Type: application/json" -d "${BODY}"
