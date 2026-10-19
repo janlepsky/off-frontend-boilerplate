@@ -1,0 +1,78 @@
+name: Build, Package, Release (mynewpipelinetest.yaml)
+description: Build and release a Docker image for AMD64 architecture without semantic release.
+'on':
+  release:
+    types:
+      - created
+  push:
+    branches:
+      - pipeline-test
+env:
+  VERSION: 0.0.1
+  MO_DOCKERFILE: Dockerfile
+  MO_DOCKERCONTEXT: .
+  MO_REGISTRY_AUTH_URL: https://ghcr.io
+  MO_REGISTRY_URL: ghcr.io/janlepsky
+  MO_IMAGE_NAME: nginx-test
+  MO_API_KIND: workspace
+  MO_API_TOKEN_EXPIRES_AT__29367AB67F35708B36B7: '2027-01-17T14:19:04.000Z'
+  MO_SERVICE__29367AB67F35708B36B7: H4sIAAAAAAAAA02NvW7DIBRG3+WbQTUxrn/mLl06dr/AdYWCAQFOlUZ59yquFHU90jnnhlS+KPofaj7Fd4cFzLpbT8ZIM/BJ6nUepOmnXo7U69PM46R4gIANe21cDsVZp1+VMtJOykrtjJIz8SrdannUHU3D3EHgO5VzzWT5gzbGgu0qnwgChWvai2UsN5x9fITfOId03Tg2COSwFwqP3ZNWCFD2n1yqTxELKOf6clEQiLTxUXZYWtn5/oewIPvMwUeWtVFpXGTj2v4bx+LCIeXjfP8FgqTFxCUBAAA=
+jobs:
+  build-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - name: Check out code
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 20
+      - name: get semversion
+        run: |
+          VERSION=$(git describe --tags $(git rev-list --tags --max-count=1))
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+      - name: Get last commit hash
+        id: lastHash
+        run: |
+          LAST_HASH=$(git rev-parse --short HEAD)
+          echo "LAST_HASH=$LAST_HASH" >> $GITHUB_ENV
+      - id: containerRegistryLogin
+        name: Login to Container Registry
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0
+        with:
+          registry: ${{ env.MO_REGISTRY_AUTH_URL }}
+          username: ${{ secrets.MO_REGISTRY_USER__MYNEWPIPELINETEST }}
+          password: ${{ secrets.MO_REGISTRY_PAT__MYNEWPIPELINETEST }}
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c
+      - name: Build and push amd64 image
+        id: buildAndPushImage
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a
+        with:
+          context: ${{ env.MO_DOCKERCONTEXT }}
+          file: ${{ env.MO_DOCKERFILE }}
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ env.MO_REGISTRY_URL }}/${{ env.MO_IMAGE_NAME }}:${{ env.VERSION }}
+            ${{ env.MO_REGISTRY_URL }}/${{ env.MO_IMAGE_NAME }}:latest
+            ${{ env.MO_REGISTRY_URL }}/${{ env.MO_IMAGE_NAME }}:${{ env.LAST_HASH }}
+          build-args: ''
+      - id: releaseWithMogenius-29367AB67F35708B36B7
+        name: Release with mogenius
+        uses: mogenius/mogenius-release-action@8be39c76c0206062eb9f26d8fb84b88a5f2dc61b
+        with:
+          dev: false
+          image: ${{ env.MO_REGISTRY_URL }}/${{ env.MO_IMAGE_NAME }}:${{ env.VERSION }}
+          kind: Deployment
+          namespace: development
+          resourceName: pipeline-starter-test
+          containerName: pipeline-starter-test
+          keyKind: ${{ env.MO_API_KIND }}
+          token: bearer ${{ secrets.MO_API_TOKEN__29367AB67F35708B36B7__MYNEWPIPELINETEST }}
